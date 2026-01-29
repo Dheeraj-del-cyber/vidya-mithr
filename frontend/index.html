@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vidya Mitra (विद्या मित्र)</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ffffff, #1e0808);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
+
+
+.container {
+    width: 90%;
+    max-width: 900px;
+    background: #fefefe;
+    color: #333;
+    border-radius: 20px;
+    padding: 30px 40px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    animation: fadeIn 0.6s ease-in-out;
+    text-align: center;
+}
+
+
+h1 {
+    color: #2c5364;
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #555;
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+
+textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px solid #ccc;
+    resize: none;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+textarea:focus {
+    border-color: #2c5364;
+    box-shadow: 0 0 8px rgba(44,83,100,0.3);
+}
+
+button {
+    margin-top: 15px;
+    padding: 15px 30px;
+    border-radius: 15px;
+    border: none;
+    background: linear-gradient(135deg, #2c5364, #203a43);
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(32,58,67,0.35);
+}
+
+.answer-box {
+    margin-top: 20px;
+    background: #ecf0f1;
+    border-radius: 15px;
+    padding: 25px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: #5c738a;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    min-height: 100px;
+    transition: all 0.3s ease;
+}
+
+
+.thinking {
+    color: #2c5364;
+    font-style: italic;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%,50%,100% {opacity: 1;}
+    25%,75% {opacity: 0.3;}
+}
+
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #888;
+}
+
+
+@media (max-width: 650px) {
+    h1 { font-size: 28px; }
+    textarea { min-height: 80px; }
+    button { width: 100%; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Vidya Mitra (विद्या मित्र)</h1>
+    <p class="subtitle">Your Academic Companion — Accurate Doubt Resolution</p>
+    <p style="text-align:right; margin-bottom:10px;">
+    <a href="history.html" style="color:#2c5364; text-decoration:none; font-weight:500;">View History</a>
+</p>
+
+    <textarea id="question" placeholder="Type your question here..."></textarea>
+    <br>
+    <button onclick="ask()">Ask</button>
+
+    <div class="answer-box" id="answer">Your answer will appear here.</div>
+
+    <div class="footer">
+        Prototype | Built with curated academic knowledge
+    </div>
+</div>
+
+<script>
+function ask() {
+    const question = document.getElementById("question").value;
+    const answerBox = document.getElementById("answer");
+
+    if(question.trim() === "") {
+        answerBox.innerText = "Please type a question!";
+        return;
+    }
+
+    answerBox.innerHTML = '<span class="thinking">Thinking...</span>';
+
+    setTimeout(() => {
+        fetch("http://127.0.0.1:5000/ask", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({question})
+        })
+        .then(res => res.json())
+        .then(data => {
+            answerBox.innerText = data.answer;
+
+            
+            let history = JSON.parse(localStorage.getItem('vidyaHistory') || '[]');
+            history.push({ question: question, answer: data.answer });
+            localStorage.setItem('vidyaHistory', JSON.stringify(history));
+        })
+        .catch(err => {
+            answerBox.innerText = "Error connecting to backend.";
+        });
+    }, 2000);
+}
+</script>
+
+</body>
+</html>
