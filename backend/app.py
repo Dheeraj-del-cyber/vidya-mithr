@@ -1,12 +1,51 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import re
+import ast
+import operator
 
 app = Flask(__name__)
 CORS(app)
 
-knowledge_base = {
+@app.route("/")
+def home():
+    return "Backend is running."
 
-    
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+ 
+
+allowed_operators = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+}
+
+def safe_calculate(expression):
+    def eval_node(node):
+        if isinstance(node, ast.Num): 
+            return node.n
+        elif isinstance(node, ast.BinOp):  
+            op_type = type(node.op)
+            if op_type in allowed_operators:
+                return allowed_operators[op_type](
+                    eval_node(node.left),
+                    eval_node(node.right)
+                )
+            else:
+                raise ValueError("Operator not allowed")
+        else:
+            raise ValueError("Invalid expression")
+
+    tree = ast.parse(expression, mode="eval")
+    return eval_node(tree.body)
+
+
+
+knowledge_base = {
     "ohms law": "Ohm’s Law states that V = IR, where V is voltage, I is current, and R is resistance.",
     "newtons first law": "Newton’s First Law states that a body remains at rest or in uniform motion unless acted upon by an external force.",
     "newtons second law": "Newton’s Second Law states that Force equals Mass multiplied by Acceleration (F = ma).",
@@ -25,11 +64,7 @@ knowledge_base = {
     "determinant": "The determinant is a scalar value that provides important properties of a square matrix.",
     "eigenvalue": "An eigenvalue is a scalar that describes how a linear transformation affects a vector.",
     "probability": "Probability measures the likelihood of an event occurring, ranging from 0 to 1.",
-    "1+1":"2",
-    "2+2":"4",
-    "10+10":"20",
-    "1500+1500":"3000",
-
+    
     
 
    
@@ -151,19 +186,35 @@ knowledge_base = {
     "why is this reliable": "The system uses syllabus-aligned, pre-verified academic knowledge.",
     "how is this different from chatgpt": "Unlike generative AI, this system avoids hallucinations by using fixed academic content.",
     "is it scalable": "Yes, the system scales by expanding the curated knowledge base or adding AI retrieval later.",
-    "real world impact": "It helps students clear doubts instantly and reduces learning gaps."
+    "real world impact": "It helps students clear doubts instantly and reduces learning gaps.",
+    "who built you":"I was built by the Masters: DHEERAJ,DHANUSH,MANVITH.",
 }
+
+
+
+
+
 @app.route("/ask", methods=["POST"])
 def ask():
-    question = request.get_json().get("question", "").lower()
+    question = request.get_json().get("question", "").lower().strip()
+
+    
+    if re.fullmatch(r"[0-9\.\+\-\*/%\(\)\s]+", question):
+        try:
+            result = safe_calculate(question)
+            return jsonify({"answer": f" {result}"})
+        except:
+            return jsonify({"answer": "Invalid mathematical expression!!"})
 
     for key in knowledge_base:
         if key in question:
             return jsonify({"answer": knowledge_base[key]})
 
     return jsonify({
-        "answer": "This question will be answered using verified academic sources in the full version.THANK YOU"
+        "answer": "Oops. The question you are asking is currently not trained for me."
     })
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
