@@ -7,14 +7,6 @@ import operator
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/")
-def home():
-    return "Backend is running."
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0",port=5000)
- 
-
 allowed_operators = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
@@ -64,7 +56,11 @@ knowledge_base = {
     "determinant": "The determinant is a scalar value that provides important properties of a square matrix.",
     "eigenvalue": "An eigenvalue is a scalar that describes how a linear transformation affects a vector.",
     "probability": "Probability measures the likelihood of an event occurring, ranging from 0 to 1.",
-    
+    "who is adhi":"Adhi which is typically aditiya is guy from electronics and communication,i guess he is a good friend of you",
+    "who is dhanush":"well Dhanush is a close friend of you,i guess so..",
+    "which is best ec or cs":"well it depends upon the college and also the student",
+    "current prime minister":"NARENDRA MODI",
+    "who is dheeraj":"Dheeraj is my master!!!",
     
 
    
