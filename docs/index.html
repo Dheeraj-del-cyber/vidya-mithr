@@ -168,7 +168,7 @@ function ask() {
         fetch(" https://vidya-mithr.onrender.com/ask", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({question})
+            body: JSON.stringify({question:userQuestion})
         })
         .then(res => res.json())
         .then(data => {
